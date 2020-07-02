@@ -56,7 +56,7 @@ public class GDrive {
 	 */
 	private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
 		// Load client secrets.
-		InputStream in = Drive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+		InputStream in = GDrive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
 		if (in == null) {
 			throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
 		}
@@ -92,47 +92,103 @@ public class GDrive {
 			try {
 				int count = 0;
 				int count1 = 0;
-
-				String html = "<html>" +
-				"<head>"+
-				"<script type='text/javascript'>" +
-				"window.onload = function () {" +
-					"var chart = new CanvasJS.Chart('chartContainer'," +
-					"{" +
-						"title:{" +
-							"text: 'Google Drive Report'" +
-						"}," +
-						"legend: {" +
-							"maxWidth: 350," +
-							"itemWidth: 120" +
-						"}," +
-						"data: [";
-				String html1 =	"{" +
-							"type: 'pie'," +
-							"showInLegend: true," +
-							"legendText: '{indexLabel}'," +
-							"dataPoints: [";	
-				String html2 =		"]" +
-						"}" +
-						"]" +
-					"});" +
-					"chart.render();" +
- 				"}" +
-				"</script>" +
-				"<script type='text/javascript' src='https://canvasjs.com/assets/script/canvasjs.min.js'></script>" +
-				"</head>" +
-				"<body>" +
-				"<div id='chartContainer' style='height: 300px; width: 100%;'></div>" +
-				"</body>" +
-				"</html>";
+				
+				//htmlcode
 				FileWriter fw = new FileWriter("Result.html");
-				fw.write(html);
-				fw.write(html1);
-				fw.write("{ y: 8, indexLabel: 'No of Folders' },");
-				fw.write("{ y: 21, indexLabel: 'No of Files' },");
-				fw.write("{ y: 17, indexLabel: 'No of Duplicate Images' }");
-				fw.write(html2);
-//				fw.close();
+				String html = "<html lang='en-US>" ;
+
+				String html1 = "<head>" +
+				"<meta charset='utf-8'>" +
+				  "<meta name='viewport' content='width=device-width, initial-scale=1'>" +
+				  "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'>" +
+				  "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>" +
+				  "<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js'></script>" +
+				  "<body>" +
+				"<div class='row'>" +
+				        "<br><br><div id='piechart' class='col-sm-6'></div>" +
+				        "<div id='table_div' class='col-sm-6'></div>" +
+				"</div>" +
+				"<script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>" +
+				"<script type='text/javascript'>" +
+				// Load google charts
+
+				"google.charts.load('current', {'packages':['corechart']});" +
+				"google.charts.setOnLoadCallback(drawChart);" +
+
+				// Draw the chart and set the chart values
+				"function drawChart() {" +
+				  "var data = google.visualization.arrayToDataTable(["+
+				
+				  "['Summary', 'Count'],";
+				
+				String html2 = "]);" +
+
+				  // Optional; add a title and set the width and height of the chart
+				  "var options = {'title':'files & folders', 'width':450, 'height':300};"+
+
+				  // Display the chart inside the <div> element with id="piechart"
+				  "var chart = new google.visualization.PieChart(document.getElementById('piechart'));"+
+				  "chart.draw(data, options);"+
+				"}"+
+
+				"</script>"+
+				   "<script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>"+
+				    "<script type='text/javascript'>"+
+				      "google.charts.load('current', {'packages':['table']});" +
+				      "google.charts.setOnLoadCallback(drawTable);" +
+
+				      "function drawTable() {"+
+				       " var data = new google.visualization.DataTable();" +
+				        "data.addColumn('string', 'Summary of drive');" +
+				        "data.addColumn('number', 'Count');"+
+				        "data.addRows([";
+				          
+				      String html3= "]);" +
+
+				        "var table = new google.visualization.Table(document.getElementById('table_div'));"+
+
+				        "table.draw(data, {width: '50%', height: '20%'});"+
+				      "}"+
+				    "</script>"+
+				"</body>"+
+				    "<body><p><br></p></body>"+
+				 
+				"</body>" +
+				    "<div id='columnchart_values' style='width: 900px; height: 300px;' align='center'></div>"+
+
+				"<script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>"+
+				  "<script type='text/javascript'>"+
+				    "google.charts.load('current', {packages:['corechart']});"+
+				    "google.charts.setOnLoadCallback(drawChart);"+
+				    "function drawChart() {"+
+				      "var data = google.visualization.arrayToDataTable(["+
+				        "['Folders', 'Count', { role: 'style' } ],";
+				        
+				      String html4 = "]);"+
+
+				      "var view = new google.visualization.DataView(data);"+
+				      "view.setColumns([0, 1,"+
+				                       "{ calc: 'stringify',"+
+				                         "sourceColumn: 1,"+
+				                         "type: 'string',"+
+				                         "role: 'annotation' },"+
+				                       "2]);"+
+
+				      "var options = {"+
+				        "title: 'Graphical Representation of drive',"+
+				       " width: 600,"+
+				       " height: 400,"+
+				        "bar: {groupWidth: '95%'},"+
+				        "legend: { position: 'none' },"+
+				      "};"+
+				      "var chart = new google.visualization.ColumnChart(document.getElementById('columnchart_values'));"+
+				      "chart.draw(view, options);"+
+				  "}"+
+
+				  "</script>"+
+				  "</body>"+
+				"</html>";
+
 				for (File file : files) {
 
 					if (file.getMimeType().equals("application/vnd.google-apps.folder")) {
@@ -167,25 +223,8 @@ public class GDrive {
 				System.out.println(" ");
 //				fw.write("<html>");
 //				fw.write("<head>");
-                fw.write("<br><br><br><TABLE BORDER='5' bordercolor='black' align = 'center'><TR><TH >Summary of Drive<TH></TR>");
 
 				for (File f1 : files) {
-
-//					fw.write("<script type=\"text/javascript\">");
-//					fw.write("window.onload = function () {");
-//					fw.write("var chart = new CanvasJS.Chart(\"chartContainer\",");
-//					fw.write("{");
-//					fw.write("title:{");
-//					fw.write("text: \"Google Drive Report\"");
-//					fw.write("},");
-//					fw.write("legend: {");
-//					fw.write("maxWidth: 350,");
-//					fw.write("itemWidth: 120");
-//					fw.write("},");
-//					fw.write("data: [");
-//					fw.write("type: \"pie\",");
-//					fw.write("showInLegend: true,");
-//					fw.write("legendText: \"{indexLabel}\",");
 
 					if (f1.getMimeType().equals("application/vnd.google-apps.folder")) {
 //						System.out.println("" + f1.getMimeType() + "\t\t\t" + f1.getName());
@@ -203,38 +242,29 @@ public class GDrive {
 				System.out.println("No of Folders: " + count2);
 				System.out.println("No of Files: " + count3);
 				System.out.println("No of Duplicate Images: " + count4);
-				fw.write("<TR><TD>" + "No of folders: " + "<TD>" + count2);
-				fw.write("<TR><TD>" + "No of files: " + "<TD>" + count3);
-				fw.write("<TR><TD>" + "No of duplicate Images: " + "<TD>" + count4);
-				fw.write("</TABLE>");
-
-//				fw.write("dataPoints: [");
-//				fw.write("{ y:" + count2 + ",indexLabel: \"No of Folders\" }");
-//				fw.write("{ y:" + count3 + ",indexLabel: \"No of Files\" }");
-//				fw.write("{ y:" + count4 + ",indexLabel: \"No of Duplicate Images\" }");
-//				fw.write("]");
-//				fw.write("}");
-//				fw.write("]");
-//				fw.write("});");
-//				fw.write("chart.render();");
-//				fw.write("}");
-//				fw.write("</script>");
-//				fw.write(
-//						"<script type=\"text/javascript\" src=\"https://canvasjs.com/assets/script/canvasjs.min.js\"></script>");
-//				fw.write("</head>");
-//				fw.write("<body>");
-//				fw.write("<div id=\"chartContainer\" style=\"height: 300px; width: 100%;\"></div>");
-//				fw.write("</body>");
-//				fw.write("</html>");
-//				fw.close();
+				fw.write(html);
+				fw.write("<body><p><h1 style='align: center'><strong>Google Drive Report<strong></h1></p></body>");
+				fw.write(html1);
+				fw.write("['No of folders', 8],");
+				fw.write("['No of files', 2],");
+				fw.write("['No of duplicate images', 4]");
+				fw.write(html2);
+				 fw.write("['Number of folders',  8],");
+		          fw.write("['Number of files',   2],");
+		          fw.write("['No of Images', 4]");
+				fw.write(html3);
+				 fw.write("['test1', 8, '#b87333'],");
+			        fw.write("['test2', 10, 'silver'],");
+			        fw.write("['test3', 19, 'gold'],");
+			        fw.write("['test4', 21, 'color: #e5e4e2']");
+			        fw.write(html4);
+			        fw.close();
 				count2 = 0;
 				count3 = 0;
 				count4 = 0;
-				fw.close();
 			} catch (Exception e) {
 				e.getMessage();
 			}
-//			System.out.println("out: " +count2);
 		}
 	}
 
